@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class AppColors {
   static final  Color primary = '#F24141'.toColor();
   static final Color onPrimary = '#F9FFFF'.toColor();
-  static final Color secondary = '#F24141'.toColor();
+  static final Color secondary = '#141B33'.toColor();
   static final Color onSecondary = '#F24141'.toColor();
   static final Color background = '#0F1426'.toColor();
   static final Color onBackground = '#6C7086'.toColor();

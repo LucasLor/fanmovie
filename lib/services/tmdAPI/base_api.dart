@@ -2,10 +2,11 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 
-abstract class BaseApi {
-  final _APIKEY = 'be28a2cddb09eaaf152092a1267611a4';
-  final _BASEURL = 'api.themoviedb.org';
-  final _BASEIMAGEAPI = 'image.tmdb.org';
+class BaseApi {
+  static const _APIKEY = 'be28a2cddb09eaaf152092a1267611a4';
+  static const _BASEURL = 'api.themoviedb.org';
+  static const _BASEIMAGEAPI = 'image.tmdb.org';
+  static const NOTFOUNDIMAGE = 'image.tmdb.org';
 
   Uri getFullUrl(String endPoint, [Map<String, dynamic> params = const {}]) {
     Map<String, dynamic> newParams = Map<String, dynamic>.from(params);
@@ -22,6 +23,15 @@ abstract class BaseApi {
     return uri;
   }
 
+  static Uri getImageFromRelativePath2(String imageUrl, [int width = 0]) {
+    Uri uri = Uri(
+        scheme: 'https',
+        host: _BASEIMAGEAPI,
+        path: '/t/p/${width == 0 ? 'original' : 'w$width'}${imageUrl.startsWith('/') ? imageUrl : '/$imageUrl'}',
+      );
+      
+    return uri;
+  }
   Uri getImageFromRelativePath(String imageUrl, [int width = 0]) {
     Uri uri = Uri(
         scheme: 'https',

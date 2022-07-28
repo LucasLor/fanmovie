@@ -181,7 +181,8 @@ class _SearchPageState extends State<SearchPage> {
   Widget Header() {
     return PotraitCarousel(
       items: dayTrendsList.results
-          .map((e) => PotraitCarouselItem(
+          .map((e) => PotraitCarouselItemList(
+            id: e.id,
               imageUrl: mv
                   .getImageFromRelativePath(e.posterPath.toString(), 300)
                   .toString(),

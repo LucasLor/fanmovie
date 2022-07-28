@@ -8,7 +8,7 @@ import '../../model/potrait_carousel_item.dart';
 import '../../style/app_colors.dart';
 
 class PotraitCarousel extends StatelessWidget {
-  final List<PotraitCarouselItem> items;
+  final List<PotraitCarouselItemList> items;
   final String tileTitle;
   final VoidCallback onTilePressed;
   final void Function(int) onItemPressed;
@@ -47,7 +47,7 @@ class PotraitCarousel extends StatelessWidget {
           ),
           itemCount: items.length,
           itemBuilder: (BuildContext context, int itemIndex, int pageViewIndex) {
-            return PotraitCarouselItemWidget(item: items[itemIndex],);
+            return PotraitCarouselItem(item: items[itemIndex], onPress: onItemPressed, );
           },
         ),
       ],
