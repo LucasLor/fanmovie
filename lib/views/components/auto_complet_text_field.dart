@@ -7,14 +7,15 @@ import '../../services/tmdAPI/search_services.dart';
 import '../../style/app_colors.dart';
 
 class AutoCompleteSearchWidget extends StatefulWidget {
+    final void Function(String) onSubmitted;
+  final void Function(String) onChange;
+
   const AutoCompleteSearchWidget({
     Key? key,
-    required this.onSelect,
+    required this.onSubmitted,
     required this.onChange,
   }) : super(key: key);
 
-  final void Function(String) onSelect;
-  final void Function(String) onChange;
   @override
   State<AutoCompleteSearchWidget> createState() =>
       _AutoCompleteSearchWidgetState();
@@ -25,15 +26,17 @@ class _AutoCompleteSearchWidgetState extends State<AutoCompleteSearchWidget> {
   Timer? _debounce;
   GlobalKey stickyKey = GlobalKey();
   
-  Widget fieldViewBuilder(
-      context, textEditingController, focusNode, void Function() onFieldSubmitted) {
+  Widget fieldViewBuilder(BuildContext context, TextEditingController textEditingController, FocusNode focusNode, void Function() onFieldSubmitted) {
+    // Atualiza onChange text com o Listner, por que se usar o onChange do textfield para de funcionar o Autocomplete.
+    textEditingController.addListener(() => widget.onChange(textEditingController.text));
+
     return Container(
       key: stickyKey,
       padding:const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
        decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(15)),
           color: AppColors.surface),
-      child: TextField(    
+      child: TextField(
         style: TextStyle(color: AppColors.onSurface, fontSize: 20),
         decoration: InputDecoration(
             hintText: 'Pesquisar...',
@@ -44,11 +47,11 @@ class _AutoCompleteSearchWidgetState extends State<AutoCompleteSearchWidget> {
                 Icons.search,
                 color: AppColors.onSurface,
               ),
-              onPressed: ()=> onFieldSubmitted(),
+              onPressed: ()=> widget.onSubmitted(textEditingController.text),
             )),            
-        onChanged: widget.onChange,
         controller: textEditingController,
-        focusNode: focusNode,        
+        focusNode: focusNode,
+        onEditingComplete: (){widget.onSubmitted(textEditingController.value.text);  focusNode.unfocus(); },     
       ),
     );
   }
@@ -119,8 +122,7 @@ class _AutoCompleteSearchWidgetState extends State<AutoCompleteSearchWidget> {
       displayStringForOption: displayStringForOption,
       optionsBuilder: optionsBuilder,
       optionsViewBuilder: optionsViewBuilder,
-      onSelected: (k) => widget.onSelect(k.name),       
-    );    
+      );    
   }
 
   @override

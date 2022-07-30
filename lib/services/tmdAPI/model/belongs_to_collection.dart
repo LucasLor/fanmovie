@@ -1,3 +1,5 @@
+import 'package:fanmovie/services/tmdAPI/base_api.dart';
+
 class BelongsToCollection {
   BelongsToCollection({
     required this.id,
@@ -13,8 +15,10 @@ class BelongsToCollection {
   BelongsToCollection.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     name = json['name'];
-    posterPath = json['poster_path'];
-    backdropPath = json['backdrop_path'];
+    posterPath = json['poster_path'] != null ? BaseApi.getImageFromRelativePath2(json['poster_path'], 600).toString() : BaseApi.NOTFOUNDIMAGE;
+    backdropPath = json['backdrop_path'] != null
+        ? BaseApi.getImageFromRelativePath2(json['backdrop_path'], 600).toString()
+        : BaseApi.NOTFOUNDIMAGE;
   }
 
   Map<String, dynamic> toJson() {

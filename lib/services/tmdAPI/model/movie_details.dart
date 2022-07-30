@@ -42,7 +42,7 @@ class MovieDetails {
   });
   late final bool adult;
   late final String backdropPath;
-  late final BelongsToCollection belongsToCollection;
+  late final BelongsToCollection? belongsToCollection;
   late final int budget;
   late final List<Genre> genres;
   late final String homepage;
@@ -72,8 +72,8 @@ class MovieDetails {
   MovieDetails.fromJson(Map<String, dynamic> json) {
     adult = json['adult'];
     backdropPath = json['backdrop_path'] != null ? BaseApi.getImageFromRelativePath2(json['backdrop_path']).toString() : BaseApi.NOTFOUNDIMAGE;
-    belongsToCollection =
-        BelongsToCollection.fromJson(json['belongs_to_collection']);
+    belongsToCollection = json['belongs_to_collection'] != null ?
+        BelongsToCollection.fromJson(json['belongs_to_collection']) : null;
     budget = json['budget'];
     genres = List.from(json['genres']).map((e) => Genre.fromJson(e)).toList();
     homepage = json['homepage'];
@@ -113,7 +113,7 @@ class MovieDetails {
     final data = <String, dynamic>{};
     data['adult'] = adult;
     data['backdrop_path'] = backdropPath;
-    data['belongs_to_collection'] = belongsToCollection.toJson();
+    data['belongs_to_collection'] = belongsToCollection?.toJson();
     data['budget'] = budget;
     data['genres'] = genres.map((e) => e.toJson()).toList();
     data['homepage'] = homepage;

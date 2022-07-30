@@ -8,7 +8,7 @@ import 'model/paginable_movie_result.dart';
 class SearchService extends BaseApi {
 
   /// primaryReleaseYear = 2022, 2021, 2020 ...
-   Future<PaginableMovieResult> searchMovie(String query, {adult = false, page = 1, primaryReleaseYear = 0, getAll = false}) async {
+   Future<PaginableMovieResult> searchMovie(String query, {adult = false, page = 1, int primaryReleaseYear = 0, getAll = false}) async {
     // primaryReleaseYear != do padrão 2022 é ignorado.
     Map<String, String> headers = {'language': 'pt-BR',
      'page': '$page',

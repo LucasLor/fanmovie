@@ -1,5 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:fanmovie/views/components/custom_list_tile.dart';
 import 'package:fanmovie/views/components/potrait_carousel_item.dart';
 import 'package:flutter/material.dart';
 
@@ -25,20 +26,7 @@ class PotraitCarousel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        ListTile(          
-          onTap: onTilePressed,
-          contentPadding: EdgeInsets.only(left: 0, bottom: 10, top: 10, right: 20),
-          trailing: Icon(
-            Icons.chevron_right_rounded,
-            size: 40,
-            color: AppColors.onBackground,
-          ),
-          title: Text(
-            tileTitle,
-            style: TextStyle(color: AppColors.onBackground, fontSize: 22),
-            textAlign: TextAlign.left,
-          ),
-        ),
+       CustomListTile(onTilePressed: onTilePressed, tileTitle: tileTitle),
         CarouselSlider.builder(
           options: CarouselOptions(
             enableInfiniteScroll: true,

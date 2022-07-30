@@ -9,9 +9,9 @@ import 'package:flutter/material.dart';
 import '../../services/tmdAPI/model/cast.dart';
 import '../../services/tmdAPI/model/genre.dart';
 
-class ScreenArgs {
+class MoviePageScreenArgs {
   final int movieID;
-  ScreenArgs({
+  MoviePageScreenArgs({
     required this.movieID,
   });
 }
@@ -118,9 +118,8 @@ class MoviePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    ScreenArgs args = ScreenArgs(
-        movieID:
-            1771); // ModalRoute.of(context)!.settings.arguments as ScreenArgs ;
+    MoviePageScreenArgs args = ModalRoute.of(context)!.settings.arguments as MoviePageScreenArgs ;
+    //MoviePageScreenArgs args = MoviePageScreenArgs(        movieID:            1771); 
 
     return CustomFutureBuilder<MovieDetails>(
       future: _fetchData(args.movieID),

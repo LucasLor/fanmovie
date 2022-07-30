@@ -1,5 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:fanmovie/routes/main_route.dart';
+import 'package:fanmovie/routes/routes.dart';
+import 'package:fanmovie/views/page/movie_page.dart';
 import 'package:flutter/material.dart';
 
 import 'package:fanmovie/model/landscape_caroseul_item.dart';
@@ -43,7 +45,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void openMovieDetails(int id){
-      print( 'movie: ' + id.toString());
+      Navigator.pushNamed(context, Routes.MovieDetails, arguments: MoviePageScreenArgs(movieID: id));
   }
 
   void openCategoryMovies(MovieEndPoints endpoint) {
@@ -125,6 +127,7 @@ class _HomePageState extends State<HomePage> {
                   onPress: openMovieDetails ,
                   items: _upcomingList.results
                       .map((e) => LandscapeCarouselListItems(
+                        genres: e.genreIds,
                         id: e.id,
                           date: DateTime.parse(e.releaseDate.toString()),
                           title: e.title,

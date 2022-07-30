@@ -1,6 +1,8 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:fanmovie/views/components/auto_complet_text_field.dart';
+import 'package:fanmovie/views/components/custom_list_tile.dart';
+import 'package:fanmovie/views/components/infinite_Scroll.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
@@ -21,8 +23,10 @@ import 'package:fanmovie/views/components/potrait_carousel.dart';
 import 'package:fanmovie/views/components/search_item.dart';
 import 'package:fanmovie/helper/date_helper.dart' as dt;
 import '../../model/potrait_carousel_item.dart';
+import '../../routes/routes.dart';
 import '../../services/tmdAPI/model/genre.dart';
 import '../components/fake_search_bar.dart';
+import 'movie_page.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({Key? key}) : super(key: key);
@@ -37,7 +41,10 @@ class _SearchPageState extends State<SearchPage> {
   late Future<void> loading;
   late PaginableMovieResult dayTrendsList;
   bool _hasItems = false;
-  final _pagingController =  PagingController<int, Movie>(firstPageKey: 2022);
+  final _pagingControllerSearchResults =
+      PagingController<int, Movie>(firstPageKey: 2022);
+  final _pagingControllerBestOfWeek =
+      PagingController<int, Movie>(firstPageKey: 1);
   String searchText = '';
 
   void updateHasItem(bool hasItem) {
@@ -46,37 +53,57 @@ class _SearchPageState extends State<SearchPage> {
     });
   }
 
-  void handlerSearchSubmit(){
-
-  }
-
   /// Pesquisa pelos resultados por ano de forma descendente Ex: 2022, 2021, 2020 ... até 1878.
   void fetchData(int year) async {
+
+    
     // Impede muitas requisições a API quando não não há filmes a serem carregados no respectivo ano.
     await Future.delayed(const Duration(milliseconds: 100), () {});
 
     if (year < 1878) {
       // Para de fazer requisição a API quando chega no último ano com filme.
-      _pagingController.appendLastPage(List<Movie>.empty());
+      _pagingControllerSearchResults.appendLastPage(List<Movie>.empty());
     } else {
       try {
         var movieResults =
-            await sr.searchMovie('aa', getAll: true, primaryReleaseYear: year);
+            await sr.searchMovie(searchText, getAll: true, primaryReleaseYear: year);
         movieResults.results.sort((a, b) => a.title.compareTo(b.title));
-        _pagingController.appendPage(movieResults.results, year - 1);
+        _pagingControllerSearchResults.appendPage(
+            movieResults.results, year - 1);
       } on Exception catch (e) {
         print(
             'Page Search - Erro ao fazer request na página - $year :  ${e.toString()}');
-        _pagingController.appendPage(List<Movie>.empty(), year - 1);
+        _pagingControllerSearchResults.appendPage(
+            List<Movie>.empty(), year - 1);
       }
     }
   }
 
-  void handlerOnSearchText(String text){
-    _pagingController.itemList?.clear();
+  Future<void> fetchBestOfWeekMovies(int page) async {
+    var results = await mv.getPopular();
+    if (results.results.isNotEmpty) {
+      if (page <= results.totalPages) {
+        _pagingControllerBestOfWeek.appendPage(results.results, page + 1);
+      } else {
+        _pagingControllerBestOfWeek.appendLastPage(results.results);
+      }
+    } else {
+      _pagingControllerBestOfWeek.appendLastPage([]);
+    }
+  }
+
+  void handlerOnSearchText(String text) {
     setState(() {
       searchText = text;
     });
+
+    return;
+    if(_pagingControllerSearchResults!.itemList!.isNotEmpty){
+      _pagingControllerSearchResults!.itemList!.clear();
+    }
+    print(searchText);
+   _pagingControllerSearchResults.nextPageKey = 2022;
+   _pagingControllerSearchResults.notifyPageRequestListeners(2022);
     fetchData(2022);
   }
 
@@ -84,91 +111,116 @@ class _SearchPageState extends State<SearchPage> {
   void initState() {
     super.initState();
 
-    _pagingController.addListener(() {
-      updateHasItem(_pagingController.value.itemList != null &&
-          _pagingController.itemList!.isNotEmpty);
+    _pagingControllerSearchResults.addListener(() {
+      updateHasItem(_pagingControllerSearchResults.value.itemList != null &&
+          _pagingControllerSearchResults.itemList!.isNotEmpty);
+
+          print('Tem items ' + _hasItems.toString());
     });
-    _pagingController.addPageRequestListener((pageKey) {
+    _pagingControllerSearchResults.addPageRequestListener((pageKey) {
       fetchData(pageKey);
+    });
+    _pagingControllerBestOfWeek.addPageRequestListener((pageKey) {
+      fetchBestOfWeekMovies(pageKey);
     });
 
     loading = Future.wait<void>([
       (() async => dayTrendsList = await mv.getTrending(TimeWindown.day))(),
-      // (() async => autoCompleteKeyword = (await sr.searchKeyword('av')).results)(),
+      (() async => await fetchBestOfWeekMovies(1))(),
     ]);
+  }
+
+  void openMovieDetails(int id) {
+    Navigator.pushNamed(context, Routes.MovieDetails,
+        arguments: MoviePageScreenArgs(movieID: id));
+  }
+
+  Widget SearchPagedListView() {
+    return PagedListView<int, Movie>(
+      addAutomaticKeepAlives: true,
+      shrinkWrap: true,
+      scrollDirection: Axis.vertical,
+      pagingController: _pagingControllerSearchResults,
+      builderDelegate: PagedChildBuilderDelegate<Movie>(
+        itemBuilder: (context, item, index) {
+          return SearchItem(
+              title: item.title,
+              rating: item.voteAverage,
+              releaseYear:
+                  DateTime.parse(item.releaseDate ?? '0000-00-00').year,
+              imageUrl: item.posterPath,
+              overview: item.overview);
+        },
+      ),
+    );
+  }
+
+  Widget potraitCarrosuel() {
+    return PotraitCarousel(
+      items: dayTrendsList.results
+          .map((e) => PotraitCarouselItemList(
+              id: e.id,
+              imageUrl: e.posterPath,
+              title: e.title,
+              stars: e.voteAverage))
+          .toList(),
+      tileTitle: 'Melhores do dia',
+      onItemPressed: openMovieDetails,
+      onTilePressed: () {},
+    );
+  }
+
+  Widget vdssaad(){
+    daasdasdasdasd d = daasdasdasdasd(serarchText: searchText,);
+return Satasd(searchText: searchText,);
+    if(searchText.isEmpty){
+      return Header();
+    }
+
+
+  }
+  Widget _onComplete(BuildContext context, dynamic data) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        leading: Icon(
+          Icons.add_circle,
+          color: AppColors.primary,
+        ),
+        leadingWidth: 40,
+        title: const Text(
+          'FanMovie',
+          textAlign: TextAlign.left,
+        ),
+        backgroundColor: AppColors.background,
+        elevation: 0,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.only(left: 10, right: 10, top: 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AutoCompleteSearchWidget(
+                onSubmitted: handlerOnSearchText,
+                onChange: (t) {
+                  
+                }),
+            Expanded(
+              child: Satasd(
+              searchText: searchText,
+            ),
+            )
+          ],
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return CustomFutureBuilder(
       future: loading,
-      onComplete: (context, data) {
-        return Scaffold(
-          backgroundColor: AppColors.background,
-          appBar: AppBar(
-            leading: Icon(
-              Icons.add_circle,
-              color: AppColors.primary,
-            ),
-            leadingWidth: 40,
-            title: const Text(
-              'FanMovie',
-              textAlign: TextAlign.left,
-            ),
-            backgroundColor: AppColors.background,
-            elevation: 0,
-          ),
-          body: Padding(
-            padding: const EdgeInsets.only(left: 10, right: 10, top: 10),
-            child: Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  AutoCompleteSearchWidget(
-                    onSelect: handlerOnSearchText,
-                    onChange:   (t){
-                      setState(() {
-                        searchText = t;
-                      });
-                    }
-                  ),
-                  if (_hasItems)
-                    Expanded(
-                      child: Container(
-                        margin: EdgeInsets.only(top: 10),
-                        child: PagedListView<int, Movie>(
-                          addAutomaticKeepAlives: true,
-                          shrinkWrap: true,
-                          scrollDirection: Axis.vertical,
-                          pagingController: _pagingController,
-                          builderDelegate: PagedChildBuilderDelegate<Movie>(
-                            itemBuilder: (context, item, index) {
-                              return SearchItem(
-                                  title: item.title,
-                                  rating: item.voteAverage,
-                                  releaseYear: DateTime.parse(
-                                          item.releaseDate ?? '0000-00-00')
-                                      .year,
-                                  imageUrl: item.posterPath != ''
-                                      ? mv
-                                          .getImageFromRelativePath(
-                                              item.posterPath, 300)
-                                          .toString()
-                                      : 'https://lightwidget.com/wp-content/uploads/local-file-not-found-480x488.png',
-                                  overview: item.overview);
-                            },
-                          ),
-                        ),
-                      ),
-                    )
-                  else
-                    Header(),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
+      onComplete: _onComplete,
       onError: (context, error) {
         return Scaffold(
             body: Container(
@@ -179,25 +231,41 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   Widget Header() {
-    return PotraitCarousel(
-      items: dayTrendsList.results
-          .map((e) => PotraitCarouselItemList(
-            id: e.id,
-              imageUrl: mv
-                  .getImageFromRelativePath(e.posterPath.toString(), 300)
-                  .toString(),
-              title: e.title,
-              stars: e.voteAverage ?? 0))
-          .toList(),
-      tileTitle: 'Melhores do dia',
-      onItemPressed: (p0) {},
-      onTilePressed: () {},
+    return PagedListView<int, Movie>(
+      addAutomaticKeepAlives: true,
+      scrollDirection: Axis.vertical,
+      pagingController: _pagingControllerBestOfWeek,
+      builderDelegate: PagedChildBuilderDelegate<Movie>(
+        itemBuilder: (context, item, index) {
+          var searchitem = SearchItem(
+              title: item.title,
+              rating: item.voteAverage,
+              releaseYear:
+                  DateTime.parse(item.releaseDate ?? '0000-00-00').year,
+              imageUrl: item.posterPath,
+              overview: item.overview,
+            );
+
+          if (index == 0) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                potraitCarrosuel(),
+                CustomListTile(onTilePressed: (){}, tileTitle:  'Melhores da Semana'),
+                searchitem,
+                ],
+            );
+          }
+
+          return searchitem;
+        },
+      ),
     );
   }
 
   @override
   void dispose() {
-    _pagingController.dispose();
+    _pagingControllerSearchResults.dispose();
     super.dispose();
-  } 
+  }
 }

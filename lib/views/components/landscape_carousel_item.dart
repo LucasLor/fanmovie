@@ -1,3 +1,4 @@
+import 'package:fanmovie/style/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:fanmovie/model/landscape_caroseul_item.dart';
 
@@ -66,11 +67,19 @@ class LandscapeCarouselItem extends StatelessWidget {
                         textAlign: TextAlign.left,
                       ),
                     ),
-                    const Text(
-                      'ação | aventura | romance',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                      textAlign: TextAlign.left,
-                    ),
+                     Expanded(
+                       child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                         child: Text(
+                          item.genres.map((e) => e.name).join("  |  "),
+                          style: const TextStyle(color: Colors.white, fontSize: 16),
+                          textAlign: TextAlign.left,
+                          overflow: TextOverflow.clip,
+                          maxLines: 1,
+                          softWrap: true,
+                          ),
+                       ),
+                     ),
                   ],
                 )
               ],
@@ -83,23 +92,23 @@ class LandscapeCarouselItem extends StatelessWidget {
               width: 55,
               height: 25,
               child: Container(
-                decoration: const BoxDecoration(
-                    color: Colors.black38,
-                    borderRadius: BorderRadius.all(Radius.circular(40))),
+                decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: const BorderRadius.all(Radius.circular(40))),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
                       '${itemIndex + 1}',
-                      style: const TextStyle(color: Colors.white, fontSize: 15),
+                      style:  TextStyle(color: AppColors.onPrimary, fontSize: 15),
                     ),
-                    const Text(
+                     Text(
                       '/',
-                      style: TextStyle(color: Colors.white, fontSize: 15),
+                      style: TextStyle(color: AppColors.onPrimary, fontSize: 15),
                     ),
                     Text(
                       '$itemCount',
-                      style: const TextStyle(color: Colors.white, fontSize: 15),
+                      style:  TextStyle(color: AppColors.onPrimary, fontSize: 15),
                     ),
                   ],
                 ),
@@ -110,4 +119,6 @@ class LandscapeCarouselItem extends StatelessWidget {
       ),
     );
   }
+
+  
 }

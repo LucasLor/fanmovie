@@ -1,5 +1,7 @@
 import 'package:fanmovie/services/tmdAPI/base_api.dart';
 
+import 'genre.dart';
+
 class Movie {
   Movie({
     required this.adult,
@@ -17,9 +19,10 @@ class Movie {
     required this.voteAverage,
     required this.voteCount,
   });
+
   late final bool adult;
   late final String backdropPath;
-  late final List<int> genreIds;
+  late final List<Genre> genreIds;
   late final int id;
   late final String originalLanguage;
   late final String originalTitle;
@@ -35,7 +38,11 @@ class Movie {
   Movie.fromJson(Map<String, dynamic> json) {
     adult = json['adult'];
     backdropPath = json['backdrop_path'] != null ? BaseApi.getImageFromRelativePath2(json['backdrop_path']).toString() : BaseApi.NOTFOUNDIMAGE;
-    genreIds = List.castFrom<dynamic, int>(json['genre_ids']);
+    if(BaseApi.genresList.isEmpty || json['genre_ids'] == null || (json['genre_ids'] as List<dynamic>).isEmpty ){
+      genreIds = [];
+    }else {
+      genreIds = List.castFrom<dynamic, int>(json['genre_ids']).map((e) => BaseApi.genresList.firstWhere((element) => e == element.id)).toList();
+    }
     id = json['id'];
     originalLanguage = json['original_language'];
     originalTitle = json['original_title'];
