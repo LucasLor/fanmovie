@@ -1,4 +1,5 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:fanmovie/helper/util.dart';
 import 'package:fanmovie/style/app_colors.dart';
 import 'package:fanmovie/views/components/star_rating.dart';
@@ -8,9 +9,10 @@ import '../../model/potrait_carousel_item.dart';
 class PotraitCarouselItem extends StatelessWidget {
   final PotraitCarouselItemList item;
   final void Function(int) onPress;
+  final AutoSizeGroup autoSizeTextGroup;
 
   const PotraitCarouselItem(
-      {Key? key, required this.item, required this.onPress})
+      {Key? key, required this.item, required this.onPress, required this.autoSizeTextGroup})
       : super(key: key);
 
   @override
@@ -47,25 +49,22 @@ class PotraitCarouselItem extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.only(bottom: 5),
-                      child: Text(
-                        item.title,
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 16),
-                        textAlign: TextAlign.left,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        softWrap: true,
-                      ),
-                    ),
-                    StarRating(
-                        color: AppColors.primary,
-                        rating: convertStars(item.stars))
-                  ],
+                Container(
+                  margin: const EdgeInsets.only(bottom: 5),
+                  child: AutoSizeText(
+                    item.title,
+                    style:
+                        const TextStyle(color: Colors.white, fontSize: 16),
+                    textAlign: TextAlign.left,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    group: autoSizeTextGroup,
+                  ),
+                ),
+                FittedBox(
+                  child: StarRating(
+                      color: AppColors.primary,
+                      rating: convertStars(item.stars)),
                 ),
               ],
             ),

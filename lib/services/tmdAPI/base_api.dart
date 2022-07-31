@@ -70,7 +70,7 @@ class BaseApi {
   }
 
   Future<Map<String, dynamic>> getResponse(String endPoint, Map<String, String> headers) async {
-    http.Response response = await http.get(getFullUrl(endPoint, headers)).timeout(Duration(seconds: 2));
+    http.Response response = await http.get(getFullUrl(endPoint, headers));
     Map<String, dynamic> responseMap;
     if (response.statusCode == 200) {
       responseMap = jsonDecode(response.body);

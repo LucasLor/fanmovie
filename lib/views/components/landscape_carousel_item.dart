@@ -22,6 +22,7 @@ class LandscapeCarouselItem extends StatelessWidget {
       onTap: ()=> onPress(item.id),
       child: Stack(
         children: [
+          // Image backgound
           Container(
             clipBehavior: Clip.antiAlias,
             decoration: BoxDecoration(
@@ -29,6 +30,8 @@ class LandscapeCarouselItem extends StatelessWidget {
                 image: DecorationImage(
                     image: NetworkImage(item.imageUrl), fit: BoxFit.fill)),
           ),
+          
+          // Content
           Container(
             padding: const EdgeInsets.all(20),
             alignment: Alignment.bottomCenter,
@@ -52,7 +55,7 @@ class LandscapeCarouselItem extends StatelessWidget {
                   margin: const EdgeInsets.only(bottom: 10),
                   child: Text(
                     item.title,
-                    style: const TextStyle(color: Colors.white, fontSize: 22),
+                    style: const TextStyle(color: Colors.white, fontSize: 21),
                     textAlign: TextAlign.left,
                     maxLines: 1,
                   ),
@@ -63,7 +66,7 @@ class LandscapeCarouselItem extends StatelessWidget {
                       margin: const EdgeInsets.only(right: 15),
                       child: Text(
                         '${item.date.day.toString().padLeft(2, '0')}/${item.date.month.toString().padLeft(2, '0')}/${item.date.year}',
-                        style: const TextStyle(color: Colors.white, fontSize: 16),
+                        style: const TextStyle(color: Colors.white, fontSize: 15),
                         textAlign: TextAlign.left,
                       ),
                     ),
@@ -72,7 +75,7 @@ class LandscapeCarouselItem extends StatelessWidget {
                         scrollDirection: Axis.horizontal,
                          child: Text(
                           item.genres.map((e) => e.name).join("  |  "),
-                          style: const TextStyle(color: Colors.white, fontSize: 16),
+                          style: const TextStyle(color: Colors.white, fontSize: 15),
                           textAlign: TextAlign.left,
                           overflow: TextOverflow.clip,
                           maxLines: 1,
@@ -85,6 +88,8 @@ class LandscapeCarouselItem extends StatelessWidget {
               ],
             ),
           ),
+          
+          // Index Label
           Container(
             alignment: Alignment.topRight,
             margin: const EdgeInsets.only(right: 30, top: 20),
@@ -93,7 +98,7 @@ class LandscapeCarouselItem extends StatelessWidget {
               height: 25,
               child: Container(
                 decoration: BoxDecoration(
-                    color: AppColors.primary,
+                    color: AppColors.primary.withOpacity(.85),
                     borderRadius: const BorderRadius.all(Radius.circular(40))),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,

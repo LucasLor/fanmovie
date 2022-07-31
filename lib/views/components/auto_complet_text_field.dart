@@ -26,6 +26,11 @@ class _AutoCompleteSearchWidgetState extends State<AutoCompleteSearchWidget> {
   Timer? _debounce;
   GlobalKey stickyKey = GlobalKey();
   
+  void onEditingComplete(String text, FocusNode focusNode){
+    widget.onSubmitted(text);
+    focusNode.unfocus();
+  }
+
   Widget fieldViewBuilder(BuildContext context, TextEditingController textEditingController, FocusNode focusNode, void Function() onFieldSubmitted) {
     // Atualiza onChange text com o Listner, por que se usar o onChange do textfield para de funcionar o Autocomplete.
     textEditingController.addListener(() => widget.onChange(textEditingController.text));
@@ -47,11 +52,12 @@ class _AutoCompleteSearchWidgetState extends State<AutoCompleteSearchWidget> {
                 Icons.search,
                 color: AppColors.onSurface,
               ),
-              onPressed: ()=> widget.onSubmitted(textEditingController.text),
+              onPressed: ()=> onEditingComplete(
+                    textEditingController.value.text, focusNode),
             )),            
         controller: textEditingController,
         focusNode: focusNode,
-        onEditingComplete: (){widget.onSubmitted(textEditingController.value.text);  focusNode.unfocus(); },     
+        onEditingComplete: () => onEditingComplete(textEditingController.value.text, focusNode),     
       ),
     );
   }
