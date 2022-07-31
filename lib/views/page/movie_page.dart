@@ -1,13 +1,21 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'dart:ui';
+import 'dart:math';
 import 'package:fanmovie/helper/date_helper.dart';
+import 'package:fanmovie/services/tmdAPI/model/crew.dart';
 import 'package:fanmovie/services/tmdAPI/model/movie_details.dart';
 import 'package:fanmovie/services/tmdAPI/movie_services.dart';
 import 'package:fanmovie/style/app_colors.dart';
 import 'package:fanmovie/views/components/custom_future_builder.dart';
 import 'package:flutter/material.dart';
+import 'package:fanmovie/helper/intl_helper.dart' as intLHelper;
 
+import '../../model/potrait_carousel_item.dart';
+import '../../routes/routes.dart';
 import '../../services/tmdAPI/model/cast.dart';
 import '../../services/tmdAPI/model/genre.dart';
+import '../../services/tmdAPI/model/movie.dart';
+import '../components/potrait_carousel.dart';
 
 class MoviePageScreenArgs {
   final int movieID;
@@ -16,16 +24,39 @@ class MoviePageScreenArgs {
   });
 }
 
-class MoviePage extends StatelessWidget {
+class MoviePage extends StatefulWidget {
+
   MoviePage({Key? key}) : super(key: key);
 
+  @override
+  State<MoviePage> createState() => _MoviePageState();
+}
+
+class _MoviePageState extends State<MoviePage> {
   final MovieService ms = MovieService();
 
+  late List<Movie> recommendations;
+
   Future<MovieDetails> _fetchData(int movieID) async {
-    return await ms.getDetails(movieID);
+    var recommendationsResult = await ms.getRecommendations(movieID);
+    recommendations = recommendationsResult.results;
+    var detailsResult =  await ms.getDetails(movieID);
+
+    // Obtem imagem diferentes cada vez que abrir a página
+    if(detailsResult.images.backdrops.length > 1){
+      var randon = Random();
+      detailsResult.backdropPath = detailsResult.images.backdrops[randon.nextInt(detailsResult.images.backdrops.length)].filePath;
+    }
+
+    // Caso não tenha um diretor cria um 'default'
+    if(!detailsResult.credits.crew.any((element) => element.job.toLowerCase() == 'director')){
+      detailsResult.credits.crew.add(Crew(adult: false, gender: 0, id: 0, knownForDepartment: '', name: '-', originalName: '', popularity: 0, creditId: '', department: '', job: 'Director'));
+    }
+
+    return detailsResult;
   }
 
-  Widget HeaderBackgroundImage(String backgroundUrl) {
+  Widget headerBackgroundImage(String backgroundUrl) {
     return Container(
       decoration: BoxDecoration(
           image: DecorationImage(
@@ -33,7 +64,7 @@ class MoviePage extends StatelessWidget {
     );
   }
 
-  Widget HeaderFadeBackgroundImage() {
+  Widget headerImageGradientOverlay() {
     return Stack(
       children: [
         Container(
@@ -50,35 +81,31 @@ class MoviePage extends StatelessWidget {
     );
   }
 
-  Widget ListGenresItem(Genre genre, context){
-      return Container(
-        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        margin: EdgeInsets.symmetric(horizontal: 5),
-        decoration: BoxDecoration(
+  Widget ListGenresItem(Genre genre, context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      margin: EdgeInsets.symmetric(horizontal: 5),
+      decoration: BoxDecoration(
           border: Border.all(width: 1, color: AppColors.primary),
-          borderRadius: BorderRadius.all(Radius.circular(10))
+          borderRadius: BorderRadius.all(Radius.circular(10))),
+      child: Center(
+        child: Text(
+          genre.name,
+          style: TextStyle(fontSize: 15, color: AppColors.primary),
         ),
-        child: Center(
-          child: Text(
-            genre.name,
-            style: TextStyle(
-              fontSize: 15,
-              color: AppColors.primary
-            ),  
-          ),
-        ),
-      );
+      ),
+    );
   }
 
   Widget Genres(List<Genre> genres) {
     return ListView.builder(
       itemCount: genres.length,
       scrollDirection: Axis.horizontal,
-      itemBuilder: (coontext, index)=> ListGenresItem(genres[index], coontext) ,
+      itemBuilder: (coontext, index) => ListGenresItem(genres[index], coontext),
     );
   }
 
-  Widget castItem(BuildContext context, Cast item){
+  Widget castItem(BuildContext context, Cast item) {
     return Container(
       width: 100,
       height: 100,
@@ -89,9 +116,9 @@ class MoviePage extends StatelessWidget {
             height: 100,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.all(Radius.circular(1000)),
-                image: DecorationImage(
-                    image: NetworkImage(item.profilePath), fit: BoxFit.cover),
-                ),
+              image: DecorationImage(
+                  image: NetworkImage(item.profilePath), fit: BoxFit.cover),
+            ),
           ),
           Container(
             margin: EdgeInsets.only(top: 10),
@@ -108,18 +135,97 @@ class MoviePage extends StatelessWidget {
     );
   }
 
-  Widget movieCastList (List<Cast> cast){
+  Widget movieCastList(List<Cast> cast) {  
     return ListView.builder(
       itemCount: cast.length,
+      shrinkWrap: true,
       scrollDirection: Axis.horizontal,
       itemBuilder: (context, index) => castItem(context, cast[index]),
     );
   }
 
+  Widget information(String imageUrl, String title, String status, num score, num budget, num revenue, String director ) {
+    Widget getInfoItem(String title, String value) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            title,
+            maxLines: 1,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+                color: AppColors.onBackground, fontWeight: FontWeight.bold),
+          ),
+          Text(
+            value,
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            style: TextStyle(color: AppColors.onBackground),
+          ),
+        ],
+      );
+    }
+
+    return SizedBox(
+      height: 250,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: Container(
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(
+                  border: Border.all(width: 1, color: AppColors.surface),
+                  borderRadius: const BorderRadius.all(Radius.circular(15)),
+                  image: DecorationImage(
+                      image: NetworkImage(imageUrl), fit: BoxFit.fill)),
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 5),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  getInfoItem("Título Original", title),
+                  getInfoItem("Aprovação", '${score.floor()}%'),
+                  getInfoItem("Status", status),
+                  getInfoItem("Orçamento", intLHelper.getCurrency(budget)),
+                  getInfoItem("Receita", intLHelper.getCurrency(revenue)),
+                  getInfoItem("Diretor", director),
+                ],
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+   void openMovieDetails(int id, context){
+      Navigator.pushNamed(context, Routes.MovieDetails, arguments: MoviePageScreenArgs(movieID: id));
+   }
+
+  void openCategoryMovies(MovieEndPoints endpoint) {
+    print(endpoint);
+  }
+
+  Widget _createPotraitCarrousel(String label, List<Movie> items, MovieEndPoints endpoint, BuildContext context) {
+    return PotraitCarousel(
+      items: items
+          .map((e) => PotraitCarouselItemList(
+              imageUrl: e.posterPath, title: e.title, stars: e.voteAverage, id: e.id))
+          .toList(),
+      tileTitle: label,
+      onItemPressed: (id)=> openMovieDetails(id, context),
+      onTilePressed: ()=> openCategoryMovies(endpoint),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    MoviePageScreenArgs args = ModalRoute.of(context)!.settings.arguments as MoviePageScreenArgs ;
-    //MoviePageScreenArgs args = MoviePageScreenArgs(        movieID:            1771); 
+    MoviePageScreenArgs args = ModalRoute.of(context)!.settings.arguments as MoviePageScreenArgs;
 
     return CustomFutureBuilder<MovieDetails>(
       future: _fetchData(args.movieID),
@@ -130,26 +236,25 @@ class MoviePage extends StatelessWidget {
             slivers: [
               SliverAppBar(
                 flexibleSpace: FlexibleSpaceBar(
-                  title: HeaderFadeBackgroundImage(),
-                  background: HeaderBackgroundImage(data.backdropPath),
+                  title: headerImageGradientOverlay(),
+                  background: headerBackgroundImage(data.backdropPath),
                   centerTitle: false,
-                  titlePadding: EdgeInsets.all(0),
+                  titlePadding: const EdgeInsets.all(0),
                 ),
                 backgroundColor: AppColors.background,
                 pinned: true,
-                expandedHeight: 500,
+                expandedHeight: MediaQuery.of(context).size.height * .5,
               ),
               SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
+                padding: const EdgeInsets.only(left: 20, right: 20, bottom: 10),
                 sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-
+                  delegate: SliverChildListDelegate([
                   Container(
                     margin: EdgeInsets.only(bottom: 3),
                     child: Row(
                       children: [
                         Text(
-                          data.releaseDate,
+                          intLHelper.formatDAtetiem(data.releaseDate),
                           style: TextStyle(
                             color: AppColors.onBackground,
                             fontSize: 17,
@@ -174,7 +279,6 @@ class MoviePage extends StatelessWidget {
                       ],
                     ),
                   ),
-
                   Text(
                     data.title,
                     style: TextStyle(
@@ -185,82 +289,57 @@ class MoviePage extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-
-                  
-                  Container(height: 40, margin: EdgeInsets.only(top: 15), child: Genres(data.genres)),
-
-
                   Container(
-                    margin: EdgeInsets.only(top: 20, bottom: 10),
+                      height: 30,
+                      margin: EdgeInsets.only(top: 15),
+                      child: Genres(data.genres)),
+                  Container(
+                    margin: EdgeInsets.symmetric(vertical: 20),
                     child: Text(
-                      'Overview',
+                      'Sinopse',
                       style: TextStyle(
                         color: AppColors.onBackground,
-                        fontSize: 30,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold
                       ),
                       textAlign: TextAlign.left,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-
                   Text(
                     data.overview,
                     style: TextStyle(
                       color: AppColors.onBackground,
-                      fontSize: 20,
+                      fontSize: 18,
                     ),
                     textAlign: TextAlign.left,
                   ),
-                  
-
                   Container(
-                    margin: EdgeInsets.only(top: 20),
+                    margin: EdgeInsets.symmetric(vertical: 20),
                     child: Text(
-                      'Crew',
+                      'Elenco Principal',
                       style: TextStyle(
                         color: AppColors.onBackground,
-                        fontSize: 30,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold
                       ),
                       textAlign: TextAlign.left,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-
-                  Container(
-                    height: 300,
-                    margin: EdgeInsets.only(top: 10, bottom: 10),
-                    child: movieCastList(data.credits.cast),
-                  ),
-
-
-
-
-
-
-
-
-
-
-
-
-                  Container(
-                    width: 1000,
-                    height: 1000,
-                    color: AppColors.background,
+                  SizedBox(
+                    height: 200,
+                    child: movieCastList(data.credits.cast)
                   ),
                   Container(
-                    width: 1000,
-                    height: 1000,
-                    color: Colors.green,
+                    margin: EdgeInsets.symmetric(vertical: 20),
+                    child: information(data.posterPath, data.originalTitle, data.status, data.voteAverage *10, data.budget, data.revenue, data.credits.crew.firstWhere((element) => element.job == 'Director').name)
                   ),
-                  Container(
-                    width: 1000,
-                    height: 1000,
-                    color: Colors.black,
-                  ),
-                ])),
+                  _createPotraitCarrousel('Recomendações', recommendations, MovieEndPoints.recommendations, context)
+                ])
+              ),
               )
             ],
           ),

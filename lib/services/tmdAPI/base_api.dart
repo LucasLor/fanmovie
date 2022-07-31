@@ -59,16 +59,6 @@ class BaseApi {
     return uri;
   }
   
-  Uri getImageFromRelativePath(String imageUrl, [int width = 0]) {
-    Uri uri = Uri(
-        scheme: 'https',
-        host: _BASEIMAGEAPI,
-        path: '/t/p/${width == 0 ? 'original' : 'w$width'}${imageUrl.startsWith('/') ? imageUrl : '/$imageUrl'}',
-      );
-      
-    return uri;
-  }
-
   Future<Map<String, dynamic>> getResponse(String endPoint, Map<String, String> headers) async {
     http.Response response = await http.get(getFullUrl(endPoint, headers));
     Map<String, dynamic> responseMap;

@@ -1,4 +1,4 @@
 /// Transforma rating de 10 estrelas para 4 estrelas.
 double convertStars(double rating){
-  return rating / 2;
+  return double.parse( (rating / 2).toStringAsPrecision(2));
 }

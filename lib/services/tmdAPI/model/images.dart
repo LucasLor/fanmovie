@@ -1,4 +1,4 @@
-import 'package:fanmovie/services/tmdAPI/model/posters.dart';
+import 'package:fanmovie/services/tmdAPI/model/image_dat_info.dart';
 
 class Images {
   Images({

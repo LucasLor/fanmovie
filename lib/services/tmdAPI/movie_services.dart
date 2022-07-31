@@ -18,7 +18,8 @@ enum MovieEndPoints{
   pupular,
   nowPlaying,
   details,
-  trending
+  trending,
+  recommendations
 }
 
 class MovieService extends BaseApi {
@@ -95,5 +96,19 @@ class MovieService extends BaseApi {
     Map<String, dynamic> responseMap =
         await getResponse('/movie/$movieID', headers);
     return MovieDetails.fromJson(responseMap);
+  }
+
+  /// Get a list of recommended movies for a movie.
+  Future<PaginableMovieResult> getRecommendations(int movieID) async {
+    Map<String, String> headers = {
+      'language': 'pt-BR',
+      'append_to_response': 'images,videos,credits'
+    };
+    if (BaseApi.genresList.isEmpty) {
+      await updateGenres();
+    }
+    Map<String, dynamic> responseMap =
+        await getResponse('/movie/$movieID/recommendations', headers);
+    return PaginableMovieResult.fromJson(responseMap);
   }
 }
