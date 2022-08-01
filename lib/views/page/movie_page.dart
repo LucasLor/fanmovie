@@ -16,6 +16,7 @@ import '../../services/tmdAPI/model/cast.dart';
 import '../../services/tmdAPI/model/genre.dart';
 import '../../services/tmdAPI/model/movie.dart';
 import '../components/potrait_carousel.dart';
+import 'search_page copy.dart';
 
 class MoviePageScreenArgs {
   final int movieID;
@@ -207,11 +208,14 @@ class _MoviePageState extends State<MoviePage> {
       Navigator.pushNamed(context, Routes.MovieDetails, arguments: MoviePageScreenArgs(movieID: id));
    }
 
-  void openCategoryMovies(MovieEndPoints endpoint) {
-    print(endpoint);
+  void openCategoryMovies(MovieEndPoints endpoint, String title, int movieId) {
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => ViewMore(
+              args: ViewMorePageScreenArgs(endpoint: endpoint, title: title, movieId: movieId),
+            )));
   }
 
-  Widget _createPotraitCarrousel(String label, List<Movie> items, MovieEndPoints endpoint, BuildContext context) {
+  Widget _createPotraitCarrousel(String label, List<Movie> items, MovieEndPoints endpoint, BuildContext context, int movieId) {
     return PotraitCarousel(
       items: items
           .map((e) => PotraitCarouselItemList(
@@ -219,7 +223,7 @@ class _MoviePageState extends State<MoviePage> {
           .toList(),
       tileTitle: label,
       onItemPressed: (id)=> openMovieDetails(id, context),
-      onTilePressed: ()=> openCategoryMovies(endpoint),
+      onTilePressed: ()=> openCategoryMovies(endpoint, label, movieId),
     );
   }
 
@@ -337,7 +341,7 @@ class _MoviePageState extends State<MoviePage> {
                     margin: EdgeInsets.symmetric(vertical: 20),
                     child: information(data.posterPath, data.originalTitle, data.status, data.voteAverage *10, data.budget, data.revenue, data.credits.crew.firstWhere((element) => element.job == 'Director').name)
                   ),
-                  _createPotraitCarrousel('Recomendações', recommendations, MovieEndPoints.recommendations, context)
+                  _createPotraitCarrousel('Recomendações', recommendations, MovieEndPoints.recommendations, context, data.id)
                 ])
               ),
               )

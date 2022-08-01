@@ -43,7 +43,7 @@ class _PotraitCarouselState extends State<PotraitCarousel> {
           ),
           itemCount: widget.items.length,
           itemBuilder: (BuildContext context, int itemIndex, int pageViewIndex) {
-            return PotraitCarouselItem(item: widget.items[itemIndex], onPress: widget.onItemPressed, autoSizeTextGroup: _autoSizeTextGroup, );
+            return widget.items.isNotEmpty ?  PotraitCarouselItem(item: widget.items[itemIndex], onPress: widget.onItemPressed, autoSizeTextGroup: _autoSizeTextGroup, ) : Container();
           },
         ),
       ],

@@ -47,7 +47,7 @@ class MovieDetails {
   late final List<Genre> genres;
   late final String homepage;
   late final int id;
-  late final String imdbId;
+  late final String? imdbId;
   late final String originalLanguage;
   late final String originalTitle;
   late final String overview;
@@ -71,7 +71,7 @@ class MovieDetails {
 
   MovieDetails.fromJson(Map<String, dynamic> json) {
     adult = json['adult'];
-    backdropPath = json['backdrop_path'] != null ? BaseApi.getImageFromRelativePath2(json['backdrop_path']).toString() : BaseApi.NOTFOUNDIMAGE;
+    backdropPath = json['backdrop_path'] != null ? BaseApi.getImageFromRelativePath2(json['backdrop_path']).toString() : BaseApi.notFoundImage;
     belongsToCollection = json['belongs_to_collection'] != null ?
         BelongsToCollection.fromJson(json['belongs_to_collection']) : null;
     budget = json['budget'];
@@ -85,7 +85,7 @@ class MovieDetails {
     popularity = json['popularity'];
     posterPath = json['poster_path'] != null
         ? BaseApi.getImageFromRelativePath2(json['poster_path']).toString()
-        : BaseApi.NOTFOUNDIMAGE;
+        : BaseApi.notFoundImage;
     productionCompanies = List.from(json['production_companies'])
         .map((e) => ProductionCompanies.fromJson(e))
         .toList();

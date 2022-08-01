@@ -36,7 +36,7 @@ class Cast {
     name = json['name'];
     originalName = json['original_name'];
     popularity = json['popularity'];
-    profilePath = json['profile_path'] != null ? BaseApi.getImageFromRelativePath2(json['profile_path']).toString() : BaseApi.NOTFOUNDIMAGE;
+    profilePath = json['profile_path'] != null ? BaseApi.getImageFromRelativePath2(json['profile_path']).toString() : BaseApi.notFoundImage;
     castId = json['cast_id'];
     character = json['character'];
     creditId = json['credit_id'];

@@ -37,7 +37,7 @@ class Movie {
 
   Movie.fromJson(Map<String, dynamic> json) {
     adult = json['adult'];
-    backdropPath = json['backdrop_path'] != null ? BaseApi.getImageFromRelativePath2(json['backdrop_path']).toString() : BaseApi.NOTFOUNDIMAGE;
+    backdropPath = json['backdrop_path'] != null ? BaseApi.getImageFromRelativePath2(json['backdrop_path']).toString() : BaseApi.notFoundImage;
     if(BaseApi.genresList.isEmpty || json['genre_ids'] == null || (json['genre_ids'] as List<dynamic>).isEmpty ){
       genreIds = [];
     }else {
@@ -48,7 +48,7 @@ class Movie {
     originalTitle = json['original_title'];
     overview = json['overview'];
     popularity = json['popularity'];
-    posterPath = json['poster_path'] != null ? BaseApi.getImageFromRelativePath2(json['poster_path']).toString() : BaseApi.NOTFOUNDIMAGE;
+    posterPath = json['poster_path'] != null ? BaseApi.getImageFromRelativePath2(json['poster_path']).toString() : BaseApi.notFoundImage;
     releaseDate = json['release_date'];
     title = json['title'];
     video = json['video'];

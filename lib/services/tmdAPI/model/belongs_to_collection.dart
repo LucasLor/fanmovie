@@ -15,10 +15,10 @@ class BelongsToCollection {
   BelongsToCollection.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     name = json['name'];
-    posterPath = json['poster_path'] != null ? BaseApi.getImageFromRelativePath2(json['poster_path'], 600).toString() : BaseApi.NOTFOUNDIMAGE;
+    posterPath = json['poster_path'] != null ? BaseApi.getImageFromRelativePath2(json['poster_path'], 600).toString() : BaseApi.notFoundImage;
     backdropPath = json['backdrop_path'] != null
         ? BaseApi.getImageFromRelativePath2(json['backdrop_path'], 600).toString()
-        : BaseApi.NOTFOUNDIMAGE;
+        : BaseApi.notFoundImage;
   }
 
   Map<String, dynamic> toJson() {

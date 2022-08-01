@@ -1,25 +1,28 @@
-import 'package:fanmovie/helper/date_helper.dart';
-import 'package:fanmovie/services/tmdAPI/model/paginable_movie_result.dart';
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
-import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+
+import 'package:fanmovie/helper/date_helper.dart';
 import 'package:fanmovie/services/tmdAPI/model/movie.dart';
-import 'package:fanmovie/services/tmdAPI/movie_services.dart';
+import 'package:fanmovie/services/tmdAPI/model/paginable_movie_result.dart';
 import 'package:fanmovie/services/tmdAPI/search_services.dart';
 import 'package:fanmovie/views/components/search_item.dart';
-import '../../routes/routes.dart';
-import '../page/movie_page.dart';
 
-class InfiniteScrollListView extends StatefulWidget {
+class SearchInfiniteScroll extends StatefulWidget {
   final String searchText;
-
-  InfiniteScrollListView({Key? key, required this.searchText})
-      : super(key: key);
+  final void Function(int) onPress;
+   
+  SearchInfiniteScroll({
+    Key? key,
+    required this.searchText,
+    required this.onPress,
+  }) : super(key: key);
+      
 
   @override
-  State<InfiniteScrollListView> createState() => _InfiniteScrollListViewState();
+  State<SearchInfiniteScroll> createState() => _SearchInfiniteScrollState();
 }
 
-class _InfiniteScrollListViewState extends State<InfiniteScrollListView> {
+class _SearchInfiniteScrollState extends State<SearchInfiniteScroll> {
   List<Movie> items = [];
   final _scrollController = ScrollController();
   int page = getActualYear();
@@ -48,14 +51,13 @@ class _InfiniteScrollListViewState extends State<InfiniteScrollListView> {
 
   @override
   void setState(VoidCallback fn) {
-    // TODO: implement setState
     if (mounted) {
       super.setState(fn);
     }
   }
   
   @override
-  void didUpdateWidget(covariant InfiniteScrollListView oldWidget) {
+  void didUpdateWidget(covariant SearchInfiniteScroll oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     // Reseta os itens do ListView para a nova pesquisa
@@ -106,7 +108,6 @@ class _InfiniteScrollListViewState extends State<InfiniteScrollListView> {
 
     // Impede muitas requisições a API quando não não há filmes a serem carregados no respectivo ano.
     await Future.delayed(const Duration(milliseconds: 200), () {});
-    print(page);
 
     try {
       var movieResults = await _getNextData();
@@ -153,7 +154,10 @@ class _InfiniteScrollListViewState extends State<InfiniteScrollListView> {
               releaseYear:
                   DateTime.parse(items[index].releaseDate ?? '0000-00-00').year,
               imageUrl: items[index].posterPath,
-              overview: items[index].overview);
+              overview: items[index].overview,
+              genres: items[index].genreIds,
+              onPress: ()=> widget.onPress(items[index].id) ,
+              );
         } else {
           return Padding(
             padding: EdgeInsets.symmetric(vertical: hasMore ? 30 : 0),

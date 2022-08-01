@@ -1,7 +1,9 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:fanmovie/routes/main_route.dart';
 import 'package:fanmovie/routes/routes.dart';
+import 'package:fanmovie/views/components/custom_try_again.dart';
 import 'package:fanmovie/views/page/movie_page.dart';
+import 'package:fanmovie/views/page/search_page%20copy.dart';
 import 'package:flutter/material.dart';
 
 import 'package:fanmovie/model/landscape_caroseul_item.dart';
@@ -18,6 +20,7 @@ import '../../services/tmdAPI/model/movie.dart';
 import '../components/fake_search_bar.dart';
 
 class HomePage extends StatefulWidget {
+  // Usado para navegar entre as telas Home e Search
   final void Function(MainTabs)? navigateTo;
 
   const HomePage({
@@ -48,11 +51,11 @@ class _HomePageState extends State<HomePage> {
       Navigator.pushNamed(context, Routes.MovieDetails, arguments: MoviePageScreenArgs(movieID: id));
   }
 
-  void openCategoryMovies(MovieEndPoints endpoint) {
-    print(endpoint);
+  void openViewMorePage(MovieEndPoints endpoint, String title) {
+    Navigator.of(context).push(MaterialPageRoute(builder: (context)=> ViewMore(args: ViewMorePageScreenArgs(endpoint:endpoint, title: title),)));
   }
 
-  Future<void> onRefreshPage() async {
+  Future<void> refreshPage() async {
     await _fetchData();
   }
 
@@ -75,7 +78,7 @@ class _HomePageState extends State<HomePage> {
           .toList(),
       tileTitle: label,
       onItemPressed: openMovieDetails,
-      onTilePressed: ()=> openCategoryMovies(endpoint),
+      onTilePressed: ()=> openViewMorePage(endpoint, label),
     );
   }
 
@@ -91,7 +94,7 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         titleSpacing: 0,
         leading: Icon(
-          Icons.add_circle,
+          Icons.movie,
           color: AppColors.primary,
         ),
         leadingWidth: 40,
@@ -106,7 +109,7 @@ class _HomePageState extends State<HomePage> {
         padding:
             const EdgeInsets.only(left: 15, right: 15, bottom: 10, top: 10),
         child: RefreshIndicator(
-          onRefresh: onRefreshPage,
+          onRefresh: refreshPage,
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             child: Column(
@@ -146,10 +149,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _onErrorPage(BuildContext context, dynamic error) {
-    return Scaffold(
-        body: Container(
-      color: Colors.pink,
-    ));
+    return CustomTryAgain(onTryAgainPress: refreshPage);
   }
 
   Widget _onLoadingPage(BuildContext context) {

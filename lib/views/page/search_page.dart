@@ -1,34 +1,20 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:fanmovie/views/components/auto_complet_text_field.dart';
 import 'package:fanmovie/views/components/custom_circular_progress_bar.dart';
 import 'package:fanmovie/views/components/custom_list_tile.dart';
-import 'package:fanmovie/views/components/infinite_Scroll.dart';
-import 'package:fanmovie/views/components/search_item%20copy.dart';
-import 'package:flutter/foundation.dart';
+import 'package:fanmovie/views/components/search_infinite_Scroll.dart';
+import 'package:fanmovie/views/components/search_item.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
-
-import 'package:fanmovie/model/landscape_caroseul_item.dart';
-import 'package:fanmovie/services/tmdAPI/model/keyword.dart';
 import 'package:fanmovie/services/tmdAPI/model/movie.dart';
-import 'package:fanmovie/services/tmdAPI/model/paginable_keyword_result.dart';
 import 'package:fanmovie/services/tmdAPI/model/paginable_movie_result.dart';
 import 'package:fanmovie/services/tmdAPI/movie_services.dart';
-import 'package:fanmovie/services/tmdAPI/search_services.dart';
 import 'package:fanmovie/style/app_colors.dart';
 import 'package:fanmovie/views/components/custom_future_builder.dart';
-import 'package:fanmovie/views/components/landscape_carousel.dart';
 import 'package:fanmovie/views/components/potrait_carousel.dart';
-import 'package:fanmovie/views/components/search_item.dart';
-import 'package:fanmovie/helper/date_helper.dart' as dt;
 import '../../model/potrait_carousel_item.dart';
 import '../../routes/routes.dart';
-import '../../services/tmdAPI/model/genre.dart';
-import '../components/fake_search_bar.dart';
 import 'movie_page.dart';
+import 'search_page copy.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({Key? key}) : super(key: key);
@@ -83,6 +69,10 @@ class _SearchPageState extends State<SearchPage> {
         arguments: MoviePageScreenArgs(movieID: id));
   }
 
+void openCategoryMovies(MovieEndPoints endpoint, String title) {
+    Navigator.of(context).push(MaterialPageRoute(builder: (context)=> ViewMore(args: ViewMorePageScreenArgs(endpoint:endpoint, title: title),)));
+  }
+  
   Widget potraitCarrosuel() {
     return PotraitCarousel(
       items: dayTrendsList.results
@@ -94,7 +84,7 @@ class _SearchPageState extends State<SearchPage> {
           .toList(),
       tileTitle: 'Melhores do dia',
       onItemPressed: openMovieDetails,
-      onTilePressed: () {},
+      onTilePressed: ()=> openCategoryMovies(MovieEndPoints.trending, 'Melhores do dia'),
     );
   }
   
@@ -126,8 +116,9 @@ class _SearchPageState extends State<SearchPage> {
             Expanded(
               child: searchText.isEmpty ? trendsPage() : Padding(
                 padding: const EdgeInsets.only(top: 10),
-                child: InfiniteScrollListView(
+                child: SearchInfiniteScroll(
                 searchText: searchText,
+                onPress: openMovieDetails,
             ),
               ),
             )
@@ -152,7 +143,7 @@ class _SearchPageState extends State<SearchPage> {
       pagingController: _pagingControllerBestOfWeek,
       builderDelegate: PagedChildBuilderDelegate<Movie>(
         itemBuilder: (context, item, index) {
-          var searchitem = SearchItem2(
+          var searchitem = SearchItem(
             onPress: () => openMovieDetails(item.id),
               title: item.title,
               rating: item.voteAverage,
@@ -182,7 +173,6 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     _pagingControllerBestOfWeek.dispose();
   }

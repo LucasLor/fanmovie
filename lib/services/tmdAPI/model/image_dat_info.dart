@@ -22,7 +22,7 @@ class ImageDataInfo {
     aspectRatio = json['aspect_ratio'];
     height = json['height'];
     iso_639_1 = null;
-    filePath = json['file_path'] != null && (json['file_path'] as String).isNotEmpty ? BaseApi.getImageFromRelativePath2(json['file_path'], 600).toString() : BaseApi.NOTFOUNDIMAGE;
+    filePath = json['file_path'] != null && (json['file_path'] as String).isNotEmpty ? BaseApi.getImageFromRelativePath2(json['file_path'], 600).toString() : BaseApi.notFoundImage;
     voteAverage = json['vote_average'];
     voteCount = json['vote_count'];
     width = json['width'];
