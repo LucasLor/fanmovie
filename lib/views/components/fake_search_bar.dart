@@ -16,7 +16,7 @@ class FakeSearchBox extends StatelessWidget {
             padding: EdgeInsets.zero, primary: Colors.transparent),
         onPressed: onPress,
         child: SizedBox(
-          height: 61,
+          height: 60,
           child: Container(
             decoration: BoxDecoration(
                 borderRadius: const BorderRadius.all(Radius.circular(15)),
@@ -29,7 +29,7 @@ class FakeSearchBox extends StatelessWidget {
                     child: Text(
                       'Procurar...',
                       style:
-                          TextStyle(color: AppColors.onPrimary, fontSize: 20),
+                          TextStyle(color: AppColors.onBackground, fontSize: 20),
                     ),
                   ),
                   Icon(

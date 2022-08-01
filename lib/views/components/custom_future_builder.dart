@@ -36,8 +36,8 @@ class CustomFutureBuilder<T> extends StatelessWidget {
           if (onLoading != null) {
             return onLoading!(context);
           } else {
-            return Center(
-              child: CircularProgressIndicator(),
+            return const Center(
+              child:  CircularProgressIndicator(),
             );
           }
         }

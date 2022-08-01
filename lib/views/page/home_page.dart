@@ -3,7 +3,7 @@ import 'package:fanmovie/routes/main_route.dart';
 import 'package:fanmovie/routes/routes.dart';
 import 'package:fanmovie/views/components/custom_try_again.dart';
 import 'package:fanmovie/views/page/movie_page.dart';
-import 'package:fanmovie/views/page/search_page%20copy.dart';
+import 'package:fanmovie/views/page/view_more_page.dart';
 import 'package:flutter/material.dart';
 
 import 'package:fanmovie/model/landscape_caroseul_item.dart';
@@ -40,18 +40,18 @@ class _HomePageState extends State<HomePage> {
   late PaginableMovieResult _topRatedList;
   late PaginableMovieResult _popularList;
 
-  void handlerFakeSearchPress() {
+  void _handlerFakeSearchPress() {
     // Navega par a página de Search
     if (widget.navigateTo != null) {
       widget.navigateTo!(MainTabs.search);
     }
   }
 
-  void openMovieDetails(int id){
-      Navigator.pushNamed(context, Routes.MovieDetails, arguments: MoviePageScreenArgs(movieID: id));
+  void _openMovieDetails(int id){
+      Navigator.pushNamed(context, Routes.movieDetails, arguments: MoviePageScreenArgs(movieID: id));
   }
 
-  void openViewMorePage(MovieEndPoints endpoint, String title) {
+  void _openViewMorePage(MovieEndPoints endpoint, String title) {
     Navigator.of(context).push(MaterialPageRoute(builder: (context)=> ViewMore(args: ViewMorePageScreenArgs(endpoint:endpoint, title: title),)));
   }
 
@@ -77,8 +77,8 @@ class _HomePageState extends State<HomePage> {
               imageUrl: e.posterPath, title: e.title, stars: e.voteAverage, id: e.id))
           .toList(),
       tileTitle: label,
-      onItemPressed: openMovieDetails,
-      onTilePressed: ()=> openViewMorePage(endpoint, label),
+      onItemPressed: _openMovieDetails,
+      onTilePressed: ()=> _openViewMorePage(endpoint, label),
     );
   }
 
@@ -116,7 +116,7 @@ class _HomePageState extends State<HomePage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 FakeSearchBox(
-                  onPress: handlerFakeSearchPress,
+                  onPress: _handlerFakeSearchPress,
                 ),
                 Container(
                   margin: const EdgeInsets.symmetric(vertical: 20),
@@ -127,7 +127,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 LandscapeCarousel(
-                  onPress: openMovieDetails ,
+                  onPress: _openMovieDetails ,
                   items: _upcomingList.results
                       .map((e) => LandscapeCarouselListItems(
                         genres: e.genreIds,

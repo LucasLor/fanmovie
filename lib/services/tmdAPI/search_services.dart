@@ -10,12 +10,13 @@ class SearchService extends BaseApi {
   /// primaryReleaseYear = 2022, 2021, 2020 ...
    Future<PaginableMovieResult> searchMovie(String query, {adult = false, page = 1, int primaryReleaseYear = 0, getAll = false}) async {
     // primaryReleaseYear != do padrão 2022 é ignorado.
-    Map<String, String> headers = {'language': 'pt-BR',
-     'page': '$page',
+        Map<String, String> headers = getQueryParameters({
+      'page': '$page',
       'include_adult': '$adult',
-       'query': query, 
-       'primary_release_year': '$primaryReleaseYear'
-       };
+      'query': query,
+      'primary_release_year': '$primaryReleaseYear'
+    });
+
     Map<String, dynamic> responseMap = await getResponse('/search/movie', headers);
     var responseObject = PaginableMovieResult.fromJson(responseMap);
     if(getAll && responseObject.totalPages > 1){
@@ -31,20 +32,29 @@ class SearchService extends BaseApi {
   }
 
    Future<PaginableMovieResult> searchTv(String query, {adult = false, page = 1}) async {
-    Map<String, String> headers = {'language': 'pt-BR', 'page': page, 'include_adult': adult};
+      Map<String, String> headers = getQueryParameters({
+      'page': '$page',
+      'include_adult': '$adult',
+      'query': query,
+    });
     Map<String, dynamic> responseMap = await getResponse('/search/tv}', headers);
     return PaginableMovieResult.fromJson(responseMap);
   }
 
    Future<PaginableKeywordResult> searchKeyword(String query, {page = 1}) async {
-    Map<String, String> headers = {'language': 'pt-BR', 'page': '$page',  'query': query};
-    Map<String, dynamic> responseMap = await getResponse('/search/keyword', headers);
+    Map<String, String> headers = getQueryParameters({
+      'page': '$page',
+      'query': query,
+    });   
+     Map<String, dynamic> responseMap = await getResponse('/search/keyword', headers);
     return PaginableKeywordResult.fromJson(responseMap);
   }
 
    Future<List<Keyword>> movieSuggest(String query, {page = 1}) async {
-    Map<String, String> headers = {'language': 'pt-BR', 'page': '$page',  'query': query};
-    Map<String, dynamic> responseMap = await getResponse('/search/movie', headers);
+    Map<String, String> headers = getQueryParameters({
+      'page': '$page',
+      'query': query,
+    });    Map<String, dynamic> responseMap = await getResponse('/search/movie', headers);
     var keywordMap = (responseMap['results'] as Iterable<dynamic>).map((e) => Keyword.fromJson({'name': e['title'], 'id':e['id']}));
     return keywordMap.toList();
   }

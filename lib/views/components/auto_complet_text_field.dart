@@ -37,6 +37,7 @@ class _AutoCompleteSearchWidgetState extends State<AutoCompleteSearchWidget> {
 
     return Container(
       key: stickyKey,
+      height: 60,
       padding:const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
        decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(15)),
@@ -45,7 +46,7 @@ class _AutoCompleteSearchWidgetState extends State<AutoCompleteSearchWidget> {
         style: TextStyle(color: AppColors.onSurface, fontSize: 20),
         decoration: InputDecoration(
             hintText: 'Pesquisar...',
-            hintStyle: TextStyle(fontSize: 20, color: Colors.white24),
+            hintStyle: const TextStyle(fontSize: 20, color: Colors.white24),
             border: InputBorder.none,            
             suffixIcon: IconButton(
               icon: Icon(
@@ -95,12 +96,12 @@ class _AutoCompleteSearchWidgetState extends State<AutoCompleteSearchWidget> {
           child: Container(
             width: textFieldBox.size.width,    
             height: MediaQuery.of(context).size.height*.7,        
-            margin: EdgeInsets.only(top: 10),
+            margin: const EdgeInsets.only(top: 10),
             decoration: BoxDecoration(
               borderRadius: const BorderRadius.all(Radius.circular(15)),
               color: AppColors.surface),
             child: ListView.builder(
-              padding: EdgeInsets.all(10.0),
+              padding: const EdgeInsets.all(10.0),
               itemCount: options.length,
               itemBuilder: (BuildContext context, int index) {
                 final Keyword option = options.elementAt(index);

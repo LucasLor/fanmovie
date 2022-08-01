@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 
 
 import '../../model/potrait_carousel_item.dart';
-import '../../style/app_colors.dart';
 
 class PotraitCarousel extends StatefulWidget {
   final List<PotraitCarouselItemList> items;

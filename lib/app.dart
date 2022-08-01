@@ -12,7 +12,7 @@ class App extends StatelessWidget {
       theme: AppTheme.theme,
       initialRoute: Routes.home,
       routes: { Routes.home :(context) => const MainBottonTabNav(),
-        Routes.MovieDetails: (context) => MoviePage(),},
+        Routes.movieDetails: (context) => MoviePage(),},
     );
   }
 

@@ -10,7 +10,7 @@ class StarRating extends StatelessWidget {
   Widget buildStar(BuildContext context, int index) {
     Icon icon;
     if (index >= rating) {
-      icon = Icon(
+      icon = const Icon(
         Icons.star_border,
         color: Colors.white38,
       );
@@ -34,10 +34,10 @@ class StarRating extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Container(
-          margin: EdgeInsets.only(right: 3),
+          margin: const EdgeInsets.only(right: 3),
           child: Text(
             '$rating',
-            style: TextStyle(color: Colors.white, fontSize: 16),
+            style: const TextStyle(color: Colors.white, fontSize: 16),
           ),
         ),
         Row(

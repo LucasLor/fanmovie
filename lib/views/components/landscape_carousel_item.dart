@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fanmovie/style/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:fanmovie/model/landscape_caroseul_item.dart';
@@ -28,7 +29,7 @@ class LandscapeCarouselItem extends StatelessWidget {
             decoration: BoxDecoration(
                 borderRadius: const BorderRadius.all(Radius.circular(25)),
                 image: DecorationImage(
-                    image: NetworkImage(item.imageUrl), fit: BoxFit.fill)),
+                    image: CachedNetworkImageProvider(item.imageUrl), fit: BoxFit.fill)),
           ),
           
           // Content

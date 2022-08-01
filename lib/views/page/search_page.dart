@@ -1,6 +1,7 @@
 import 'package:fanmovie/views/components/auto_complet_text_field.dart';
 import 'package:fanmovie/views/components/custom_circular_progress_bar.dart';
 import 'package:fanmovie/views/components/custom_list_tile.dart';
+import 'package:fanmovie/views/components/custom_try_again.dart';
 import 'package:fanmovie/views/components/search_infinite_Scroll.dart';
 import 'package:fanmovie/views/components/search_item.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +15,7 @@ import 'package:fanmovie/views/components/potrait_carousel.dart';
 import '../../model/potrait_carousel_item.dart';
 import '../../routes/routes.dart';
 import 'movie_page.dart';
-import 'search_page copy.dart';
+import 'view_more_page.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({Key? key}) : super(key: key);
@@ -32,16 +33,19 @@ class _SearchPageState extends State<SearchPage> {
   String searchText = '';
 
   Future<void> fetchBestOfWeekMovies(int page) async {
-    var results = await _movieService.getTrending(TimeWindown.week);
-    if (results.results.isNotEmpty) {
-      if (page <= results.totalPages) {
-        _pagingControllerBestOfWeek.appendPage(results.results, page + 1);
-      } else {
-        _pagingControllerBestOfWeek.appendLastPage(results.results);
-      }
-    } else {
-      _pagingControllerBestOfWeek.appendLastPage([]);
+    var results = await _movieService.getTrending(TimeWindown.week, page);
+    
+    if(results.results.isEmpty){
+       _pagingControllerBestOfWeek.appendLastPage([]);
+       return;
     }
+
+    if (page < results.totalPages) {
+      _pagingControllerBestOfWeek.appendPage(results.results, page + 1);
+    } else {
+      _pagingControllerBestOfWeek.appendLastPage(results.results);
+    }
+    
   }
 
   void handlerOnSearchText(String text) {
@@ -60,20 +64,19 @@ class _SearchPageState extends State<SearchPage> {
 
     loading = Future.wait<void>([
       (() async => dayTrendsList = await _movieService.getTrending(TimeWindown.day))(),
-      (() async => await fetchBestOfWeekMovies(1))(),
     ]);
   }
 
-  void openMovieDetails(int id) {
-    Navigator.pushNamed(context, Routes.MovieDetails,
+  void _openMovieDetails(int id) {
+    Navigator.pushNamed(context, Routes.movieDetails,
         arguments: MoviePageScreenArgs(movieID: id));
   }
 
-void openCategoryMovies(MovieEndPoints endpoint, String title) {
+void _openCategoryMovies(MovieEndPoints endpoint, String title) {
     Navigator.of(context).push(MaterialPageRoute(builder: (context)=> ViewMore(args: ViewMorePageScreenArgs(endpoint:endpoint, title: title),)));
   }
   
-  Widget potraitCarrosuel() {
+  Widget _potraitCarrosuel() {
     return PotraitCarousel(
       items: dayTrendsList.results
           .map((e) => PotraitCarouselItemList(
@@ -83,8 +86,8 @@ void openCategoryMovies(MovieEndPoints endpoint, String title) {
               stars: e.voteAverage))
           .toList(),
       tileTitle: 'Melhores do dia',
-      onItemPressed: openMovieDetails,
-      onTilePressed: ()=> openCategoryMovies(MovieEndPoints.trending, 'Melhores do dia'),
+      onItemPressed: _openMovieDetails,
+      onTilePressed: ()=> _openCategoryMovies(MovieEndPoints.trending, 'Melhores do dia'),
     );
   }
   
@@ -92,8 +95,9 @@ void openCategoryMovies(MovieEndPoints endpoint, String title) {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        titleSpacing: 0,
         leading: Icon(
-          Icons.add_circle,
+          Icons.movie,
           color: AppColors.primary,
         ),
         leadingWidth: 40,
@@ -114,11 +118,11 @@ void openCategoryMovies(MovieEndPoints endpoint, String title) {
                 onChange: (_) {}
               ),
             Expanded(
-              child: searchText.isEmpty ? trendsPage() : Padding(
+              child: searchText.isEmpty ? _trendsPage() : Padding(
                 padding: const EdgeInsets.only(top: 10),
                 child: SearchInfiniteScroll(
                 searchText: searchText,
-                onPress: openMovieDetails,
+                onPress: _openMovieDetails,
             ),
               ),
             )
@@ -128,23 +132,34 @@ void openCategoryMovies(MovieEndPoints endpoint, String title) {
     );
   }
 
+  Future<void> refreshPage() async {
+    setState(() {
+      loading = Future.wait<void>([
+        (() async =>
+            dayTrendsList = await _movieService.getTrending(TimeWindown.day))(),
+      ]);
+      _pagingControllerBestOfWeek.refresh();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return CustomFutureBuilder(
       future: loading,
       onComplete: _onComplete,
       onLoading: (context) => const CustomCircularProgressBar(),
+      onError: (a, b)=> CustomTryAgain(onTryAgainPress: refreshPage,),
     );
   }
 
-  Widget trendsPage() {
+  Widget _trendsPage() {
     return PagedListView<int, Movie>(
       addAutomaticKeepAlives: true,
-      pagingController: _pagingControllerBestOfWeek,
+      pagingController: _pagingControllerBestOfWeek,    
       builderDelegate: PagedChildBuilderDelegate<Movie>(
         itemBuilder: (context, item, index) {
           var searchitem = SearchItem(
-            onPress: () => openMovieDetails(item.id),
+            onPress: () => _openMovieDetails(item.id),
               title: item.title,
               rating: item.voteAverage,
               releaseYear:
@@ -158,7 +173,7 @@ void openCategoryMovies(MovieEndPoints endpoint, String title) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                potraitCarrosuel(),
+                _potraitCarrosuel(),
                 CustomListTile(onTilePressed: (){}, tileTitle:  'Melhores da Semana'),
                 searchitem,
                 ],

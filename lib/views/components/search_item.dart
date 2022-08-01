@@ -50,7 +50,7 @@ class SearchItem extends StatelessWidget {
     );
   }
 
-  Widget Conteudo() {
+  Widget content() {
     return LayoutBuilder(
       builder: (context, constraints) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -62,7 +62,7 @@ class SearchItem extends StatelessWidget {
             textAlign: TextAlign.left,
           ),
           Container(
-            margin: EdgeInsets.symmetric(vertical: 5),
+            margin: const EdgeInsets.symmetric(vertical: 5),
             child: AutoSizeText(
               title,
               style: TextStyle(
@@ -86,7 +86,7 @@ class SearchItem extends StatelessWidget {
             ),
           ),
           Container(
-            margin: EdgeInsets.only(top: 5, bottom: 10),
+            margin: const EdgeInsets.only(top: 5, bottom: 10),
             child: AutoSizeText(
               genres.map((e) => e.name).join(",  "),
               style: TextStyle(color: AppColors.onBackground, fontSize: 17),
@@ -134,7 +134,7 @@ class SearchItem extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   
                   children: [
-                    Conteudo(),
+                    content(),
                     Expanded( child: description()),
                   ],
                 ),

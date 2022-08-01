@@ -1,5 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fanmovie/helper/util.dart';
 import 'package:fanmovie/style/app_colors.dart';
 import 'package:fanmovie/views/components/star_rating.dart';
@@ -27,7 +28,10 @@ class PotraitCarouselItem extends StatelessWidget {
             decoration: BoxDecoration(
                 borderRadius: const BorderRadius.all(Radius.circular(10)),
                 image: DecorationImage(
-                    image: NetworkImage(item.imageUrl), fit: BoxFit.fill)),
+                    image: CachedNetworkImageProvider(item.imageUrl), 
+                    fit: BoxFit.fill
+                  )
+                ),
           ),
           Container(
             padding: const EdgeInsets.all(10),

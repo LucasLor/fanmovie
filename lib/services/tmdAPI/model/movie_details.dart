@@ -36,9 +36,9 @@ class MovieDetails {
     required this.video,
     required this.voteAverage,
     required this.voteCount,
-    required this.images,
-    required this.videos,
-    required this.credits,
+     this.images,
+     this.videos,
+     this.credits,
   });
   late final bool adult;
   late final String backdropPath;
@@ -65,9 +65,9 @@ class MovieDetails {
   late final bool video;
   late final double voteAverage;
   late final int voteCount;
-  late final Images images;
-  late final Videos videos;
-  late final Credits credits;
+  late final Images? images;
+  late final Videos? videos;
+  late final Credits? credits;
 
   MovieDetails.fromJson(Map<String, dynamic> json) {
     adult = json['adult'];
@@ -104,9 +104,9 @@ class MovieDetails {
     video = json['video'];
     voteAverage = json['vote_average'];
     voteCount = json['vote_count'];
-    images = Images.fromJson(json['images']);
-    videos = Videos.fromJson(json['videos']);
-    credits = Credits.fromJson(json['credits']);
+    images =  json['images'] != null ? Images.fromJson(json['images']) : null;
+    videos = json['videos'] != null ? Videos.fromJson(json['videos']) : null;
+    credits = json['credits'] != null ? Credits.fromJson(json['credits']) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -138,9 +138,9 @@ class MovieDetails {
     data['video'] = video;
     data['vote_average'] = voteAverage;
     data['vote_count'] = voteCount;
-    data['images'] = images.toJson();
-    data['videos'] = videos.toJson();
-    data['credits'] = credits.toJson();
+    data['images'] = images?.toJson();
+    data['videos'] = videos?.toJson();
+    data['credits'] = credits?.toJson();
     return data;
   }
 }

@@ -62,8 +62,8 @@ class MovieService extends BaseApi {
     return PaginableMovieResult.fromJson(responseMap);
   }
 
-  Future<PaginableMovieResult> getTrending(TimeWindown tw) async {
-    Map<String, String> headers = {};
+  Future<PaginableMovieResult> getTrending(TimeWindown tw, [page = 1]) async {
+    Map<String, String> headers = getQueryParameters({'page' : '$page'});
     Map<String, dynamic> responseMap =
         await getResponse('/trending/movie/${tw.name}', headers);
     return PaginableMovieResult.fromJson(responseMap);

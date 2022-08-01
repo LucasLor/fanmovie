@@ -1,12 +1,12 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'dart:ui';
-import 'dart:math';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fanmovie/helper/date_helper.dart';
 import 'package:fanmovie/services/tmdAPI/model/crew.dart';
 import 'package:fanmovie/services/tmdAPI/model/movie_details.dart';
 import 'package:fanmovie/services/tmdAPI/movie_services.dart';
 import 'package:fanmovie/style/app_colors.dart';
 import 'package:fanmovie/views/components/custom_future_builder.dart';
+import 'package:fanmovie/views/components/custom_try_again.dart';
 import 'package:flutter/material.dart';
 import 'package:fanmovie/helper/intl_helper.dart' as intLHelper;
 
@@ -16,7 +16,7 @@ import '../../services/tmdAPI/model/cast.dart';
 import '../../services/tmdAPI/model/genre.dart';
 import '../../services/tmdAPI/model/movie.dart';
 import '../components/potrait_carousel.dart';
-import 'search_page copy.dart';
+import 'view_more_page.dart';
 
 class MoviePageScreenArgs {
   final int movieID;
@@ -35,7 +35,6 @@ class MoviePage extends StatefulWidget {
 
 class _MoviePageState extends State<MoviePage> {
   final MovieService ms = MovieService();
-
   late List<Movie> recommendations;
 
   Future<MovieDetails> _fetchData(int movieID) async {
@@ -43,15 +42,9 @@ class _MoviePageState extends State<MoviePage> {
     recommendations = recommendationsResult.results;
     var detailsResult =  await ms.getDetails(movieID);
 
-    // Obtem imagem diferentes cada vez que abrir a página
-    if(detailsResult.images.backdrops.length > 1){
-      var randon = Random();
-      detailsResult.backdropPath = detailsResult.images.backdrops[randon.nextInt(detailsResult.images.backdrops.length)].filePath;
-    }
-
     // Caso não tenha um diretor cria um 'default'
-    if(!detailsResult.credits.crew.any((element) => element.job.toLowerCase() == 'director')){
-      detailsResult.credits.crew.add(Crew(adult: false, gender: 0, id: 0, knownForDepartment: '', name: '-', originalName: '', popularity: 0, creditId: '', department: '', job: 'Director'));
+    if(!detailsResult.credits!.crew.any((element) => element.job.toLowerCase() == 'director')){
+      detailsResult.credits!.crew.add(Crew(adult: false, gender: 0, id: 0, knownForDepartment: '', name: '-', originalName: '', popularity: 0, creditId: '', department: '', job: 'Director'));
     }
 
     return detailsResult;
@@ -61,7 +54,7 @@ class _MoviePageState extends State<MoviePage> {
     return Container(
       decoration: BoxDecoration(
           image: DecorationImage(
-              image: NetworkImage(backgroundUrl), fit: BoxFit.fitHeight)),
+              image: CachedNetworkImageProvider(backgroundUrl), fit: BoxFit.fitHeight)),
     );
   }
 
@@ -82,13 +75,13 @@ class _MoviePageState extends State<MoviePage> {
     );
   }
 
-  Widget ListGenresItem(Genre genre, context) {
+  Widget genreTagItem(Genre genre, context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      margin: EdgeInsets.symmetric(horizontal: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      margin: const EdgeInsets.symmetric(horizontal: 5),
       decoration: BoxDecoration(
           border: Border.all(width: 1, color: AppColors.primary),
-          borderRadius: BorderRadius.all(Radius.circular(10))),
+          borderRadius: const BorderRadius.all(Radius.circular(10))),
       child: Center(
         child: Text(
           genre.name,
@@ -98,11 +91,11 @@ class _MoviePageState extends State<MoviePage> {
     );
   }
 
-  Widget Genres(List<Genre> genres) {
+  Widget genreTagList(List<Genre> genres) {
     return ListView.builder(
       itemCount: genres.length,
       scrollDirection: Axis.horizontal,
-      itemBuilder: (coontext, index) => ListGenresItem(genres[index], coontext),
+      itemBuilder: (coontext, index) => genreTagItem(genres[index], coontext),
     );
   }
 
@@ -110,19 +103,19 @@ class _MoviePageState extends State<MoviePage> {
     return Container(
       width: 100,
       height: 100,
-      margin: EdgeInsets.symmetric(horizontal: 10),
+      margin: const EdgeInsets.symmetric(horizontal: 10),
       child: Column(
         children: [
           Container(
             height: 100,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(1000)),
+              borderRadius: const BorderRadius.all( Radius.circular(1000)),
               image: DecorationImage(
-                  image: NetworkImage(item.profilePath), fit: BoxFit.cover),
+                  image: CachedNetworkImageProvider(item.profilePath), fit: BoxFit.cover),
             ),
           ),
           Container(
-            margin: EdgeInsets.only(top: 10),
+            margin: const EdgeInsets.only(top: 10),
             child: Text(
               item.name,
               style: TextStyle(fontSize: 16, color: AppColors.primary),
@@ -179,7 +172,7 @@ class _MoviePageState extends State<MoviePage> {
                   border: Border.all(width: 1, color: AppColors.surface),
                   borderRadius: const BorderRadius.all(Radius.circular(15)),
                   image: DecorationImage(
-                      image: NetworkImage(imageUrl), fit: BoxFit.fill)),
+                      image: CachedNetworkImageProvider(imageUrl), fit: BoxFit.fill)),
             ),
           ),
           Expanded(
@@ -205,7 +198,7 @@ class _MoviePageState extends State<MoviePage> {
   }
 
    void openMovieDetails(int id, context){
-      Navigator.pushNamed(context, Routes.MovieDetails, arguments: MoviePageScreenArgs(movieID: id));
+      Navigator.pushNamed(context, Routes.movieDetails, arguments: MoviePageScreenArgs(movieID: id));
    }
 
   void openCategoryMovies(MovieEndPoints endpoint, String title, int movieId) {
@@ -233,32 +226,49 @@ class _MoviePageState extends State<MoviePage> {
 
     return CustomFutureBuilder<MovieDetails>(
       future: _fetchData(args.movieID),
-      onComplete: (context, data) {
-        return Scaffold(
-          backgroundColor: AppColors.background,
-          body: CustomScrollView(
-            slivers: [
-              SliverAppBar(
-                flexibleSpace: FlexibleSpaceBar(
-                  title: headerImageGradientOverlay(),
-                  background: headerBackgroundImage(data.backdropPath),
-                  centerTitle: false,
-                  titlePadding: const EdgeInsets.all(0),
-                ),
-                backgroundColor: AppColors.background,
-                pinned: true,
-                expandedHeight: MediaQuery.of(context).size.height * .5,
+      onComplete: _onComplete,
+      onError: (context, error) => CustomTryAgain(onTryAgainPress: refreshPage),
+    );
+  }
+
+  Scaffold _onComplete(BuildContext context, MovieDetails data) {
+    return Scaffold(
+        backgroundColor: AppColors.background,
+        body: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              flexibleSpace: FlexibleSpaceBar(
+                title: headerImageGradientOverlay(),
+                background: headerBackgroundImage(data.backdropPath),
+                centerTitle: false,
+                titlePadding: const EdgeInsets.all(0),
               ),
-              SliverPadding(
-                padding: const EdgeInsets.only(left: 20, right: 20, bottom: 10),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                  Container(
-                    margin: EdgeInsets.only(bottom: 3),
-                    child: Row(
-                      children: [
-                        Text(
-                          intLHelper.formatDAtetiem(data.releaseDate),
+              backgroundColor: AppColors.background,
+              pinned: true,
+              expandedHeight: MediaQuery.of(context).size.height * .5,
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.only(left: 20, right: 20, bottom: 10),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                Container(
+                  margin: const EdgeInsets.only(bottom: 3),
+                  child: Row(
+                    children: [
+                      Text(
+                        intLHelper.formatDAtetiem(data.releaseDate),
+                        style: TextStyle(
+                          color: AppColors.onBackground,
+                          fontSize: 17,
+                        ),
+                        textAlign: TextAlign.left,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Container(
+                        margin: const EdgeInsets.only(left: 15),
+                        child: Text(
+                          formatDuration(data.runtime),
                           style: TextStyle(
                             color: AppColors.onBackground,
                             fontSize: 17,
@@ -267,88 +277,78 @@ class _MoviePageState extends State<MoviePage> {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        Container(
-                          margin: EdgeInsets.only(left: 15),
-                          child: Text(
-                            formatDuration(data.runtime),
-                            style: TextStyle(
-                              color: AppColors.onBackground,
-                              fontSize: 17,
-                            ),
-                            textAlign: TextAlign.left,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  Text(
-                    data.title,
+                ),
+                Text(
+                  data.title,
+                  style: TextStyle(
+                    color: AppColors.onBackground,
+                    fontSize: 35,
+                  ),
+                  textAlign: TextAlign.left,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Container(
+                    height: 30,
+                    margin: const EdgeInsets.only(top: 15),
+                    child: genreTagList(data.genres)),
+                Container(
+                  margin: const EdgeInsets.symmetric(vertical: 20),
+                  child: Text(
+                    'Sinopse',
                     style: TextStyle(
                       color: AppColors.onBackground,
-                      fontSize: 35,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold
                     ),
                     textAlign: TextAlign.left,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  Container(
-                      height: 30,
-                      margin: EdgeInsets.only(top: 15),
-                      child: Genres(data.genres)),
-                  Container(
-                    margin: EdgeInsets.symmetric(vertical: 20),
-                    child: Text(
-                      'Sinopse',
-                      style: TextStyle(
-                        color: AppColors.onBackground,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold
-                      ),
-                      textAlign: TextAlign.left,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                ),
+                Text(
+                  data.overview,
+                  style: TextStyle(
+                    color: AppColors.onBackground,
+                    fontSize: 18,
                   ),
-                  Text(
-                    data.overview,
+                  textAlign: TextAlign.left,
+                ),
+                Container(
+                  margin: const EdgeInsets.symmetric(vertical: 20),
+                  child: Text(
+                    'Elenco Principal',
                     style: TextStyle(
                       color: AppColors.onBackground,
-                      fontSize: 18,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold
                     ),
                     textAlign: TextAlign.left,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  Container(
-                    margin: EdgeInsets.symmetric(vertical: 20),
-                    child: Text(
-                      'Elenco Principal',
-                      style: TextStyle(
-                        color: AppColors.onBackground,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold
-                      ),
-                      textAlign: TextAlign.left,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  SizedBox(
-                    height: 200,
-                    child: movieCastList(data.credits.cast)
-                  ),
-                  Container(
-                    margin: EdgeInsets.symmetric(vertical: 20),
-                    child: information(data.posterPath, data.originalTitle, data.status, data.voteAverage *10, data.budget, data.revenue, data.credits.crew.firstWhere((element) => element.job == 'Director').name)
-                  ),
-                  _createPotraitCarrousel('Recomendações', recommendations, MovieEndPoints.recommendations, context, data.id)
-                ])
-              ),
-              )
-            ],
-          ),
-        );
-      },
-    );
+                ),
+                SizedBox(
+                  height: 200,
+                  child: movieCastList(data.credits!.cast)
+                ),
+                Container(
+                  margin: const EdgeInsets.symmetric(vertical: 20),
+                  child: information(data.posterPath, data.originalTitle, data.status, data.voteAverage *10, data.budget, data.revenue, data.credits!.crew.firstWhere((element) => element.job == 'Director').name)
+                ),
+                _createPotraitCarrousel('Recomendações', recommendations, MovieEndPoints.recommendations, context, data.id)
+              ])
+            ),
+            )
+          ],
+        ),
+      );
+  }
+
+  void refreshPage()  {
+      Navigator.of(context).pop();
   }
 }

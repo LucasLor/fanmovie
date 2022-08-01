@@ -1,5 +1,4 @@
 import 'package:fanmovie/services/tmdAPI/model/keyword.dart';
-import 'package:fanmovie/services/tmdAPI/model/tv.dart';
 
 import 'base_paginable_result.dart';
 import 'dates.dart';
